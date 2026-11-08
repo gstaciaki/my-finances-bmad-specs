@@ -1,0 +1,14 @@
+# Repositórios de código, versionados à parte
+/my-finances-backend/
+/my-finances-frontend/
+
+# Preferências pessoais do BMad
+*.user.toml
+
+# Ambiente e arquivos locais
+.env
+.env.*
+.claude/settings.local.json
+__pycache__/
+.venv/
+.DS_Store
