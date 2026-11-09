@@ -29,59 +29,59 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-09-2026 01:20
-last_updated: 11-09-2026 01:20
+last_updated: 11-09-2026 01:32
 project: My Finances
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 development_status:
   epic-1: backlog
-  1-1-preparar-o-ambiente-de-desenvolvimento-e-testes: backlog
-  1-2-proteger-e-auditar-toda-escrita-no-banco: backlog
-  1-3-criar-o-primeiro-admin-e-fazer-login: backlog
-  1-4-manter-a-sessão-ativa-enquanto-uso-o-sistema: backlog
-  1-5-entrar-pela-tela-de-login: backlog
-  1-6-editar-meu-perfil-e-trocar-minha-senha: backlog
-  1-7-recuperar-o-acesso-por-e-mail: backlog
-  1-8-admin-cria-e-lista-usuários: backlog
-  1-9-admin-edita-e-redefine-a-senha-de-usuários: backlog
+  1-1-preparar-o-ambiente-de-desenvolvimento-e-testes: ready-for-dev
+  1-2-proteger-e-auditar-toda-escrita-no-banco: ready-for-dev
+  1-3-criar-o-primeiro-admin-e-fazer-login: ready-for-dev
+  1-4-manter-a-sessão-ativa-enquanto-uso-o-sistema: ready-for-dev
+  1-5-entrar-pela-tela-de-login: ready-for-dev
+  1-6-editar-meu-perfil-e-trocar-minha-senha: ready-for-dev
+  1-7-recuperar-o-acesso-por-e-mail: ready-for-dev
+  1-8-admin-cria-e-lista-usuários: ready-for-dev
+  1-9-admin-edita-e-redefine-a-senha-de-usuários: ready-for-dev
   epic-1-retrospective: optional
 
   epic-2: backlog
-  2-1-criar-uma-conta-e-ver-minhas-contas: backlog
-  2-2-abrir-a-conta-e-editar-nome-e-saldo-inicial: backlog
-  2-3-excluir-uma-conta: backlog
+  2-1-criar-uma-conta-e-ver-minhas-contas: ready-for-dev
+  2-2-abrir-a-conta-e-editar-nome-e-saldo-inicial: ready-for-dev
+  2-3-excluir-uma-conta: ready-for-dev
   epic-2-retrospective: optional
 
   epic-3: backlog
-  3-1-convidar-um-usuário-para-a-conta: backlog
-  3-2-aceitar-ou-recusar-um-convite: backlog
-  3-3-alterar-a-permissão-e-remover-membros: backlog
-  3-4-sair-de-uma-conta: backlog
-  3-5-transferir-a-titularidade: backlog
-  3-6-admin-exclui-um-usuário: backlog
+  3-1-convidar-um-usuário-para-a-conta: ready-for-dev
+  3-2-aceitar-ou-recusar-um-convite: ready-for-dev
+  3-3-alterar-a-permissão-e-remover-membros: ready-for-dev
+  3-4-sair-de-uma-conta: ready-for-dev
+  3-5-transferir-a-titularidade: ready-for-dev
+  3-6-admin-exclui-um-usuário: ready-for-dev
   epic-3-retrospective: optional
 
   epic-4: backlog
-  4-1-registrar-uma-movimentação: backlog
-  4-2-lançar-em-sequência-só-pelo-teclado: backlog
-  4-3-listar-movimentações-com-filtros: backlog
-  4-4-editar-e-excluir-movimentações: backlog
-  4-5-gerenciar-as-categorias-da-conta: backlog
-  4-6-categorizar-movimentações: backlog
+  4-1-registrar-uma-movimentação: ready-for-dev
+  4-2-lançar-em-sequência-só-pelo-teclado: ready-for-dev
+  4-3-listar-movimentações-com-filtros: ready-for-dev
+  4-4-editar-e-excluir-movimentações: ready-for-dev
+  4-5-gerenciar-as-categorias-da-conta: ready-for-dev
+  4-6-categorizar-movimentações: ready-for-dev
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-ver-a-lista-de-meses-da-conta: backlog
-  5-2-abrir-um-mês-e-saber-se-sobrou-ou-faltou: backlog
-  5-3-ver-os-totais-por-categoria: backlog
+  5-1-ver-a-lista-de-meses-da-conta: ready-for-dev
+  5-2-abrir-um-mês-e-saber-se-sobrou-ou-faltou: ready-for-dev
+  5-3-ver-os-totais-por-categoria: ready-for-dev
   epic-5-retrospective: optional
 
   epic-6: backlog
-  6-1-admin-vê-todas-as-contas: backlog
-  6-2-admin-transfere-a-titularidade-pela-tela: backlog
-  6-3-gerar-builds-reproduzíveis-com-ci: backlog
-  6-4-publicar-o-sistema-na-vps-com-https: backlog
-  6-5-garantir-backup-com-restauração-testada: backlog
-  6-6-enviar-e-mails-reais-e-liberar-para-uso: backlog
+  6-1-admin-vê-todas-as-contas: ready-for-dev
+  6-2-admin-transfere-a-titularidade-pela-tela: ready-for-dev
+  6-3-gerar-builds-reproduzíveis-com-ci: ready-for-dev
+  6-4-publicar-o-sistema-na-vps-com-https: ready-for-dev
+  6-5-garantir-backup-com-restauração-testada: ready-for-dev
+  6-6-enviar-e-mails-reais-e-liberar-para-uso: ready-for-dev
   epic-6-retrospective: optional
