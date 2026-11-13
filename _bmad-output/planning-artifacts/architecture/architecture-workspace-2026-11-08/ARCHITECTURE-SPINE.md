@@ -161,7 +161,7 @@ flowchart LR
 
 - **Binds:** NFR-6
 - **Prevents:** imagem de desenvolvimento em produção, deploy não reproduzível e banco errado apagado por teste.
-- **Rule:** Há dois ambientes, desenvolvimento e produção. Em desenvolvimento, a API roda no host, e o Compose sobe só o banco em `127.0.0.1`, criando também o banco de teste. `.nvmrc` e `packageManager` fixam as versões. Com `NODE_ENV=test`, a API usa `DATABASE_URL_TEST`, e a limpeza recusa banco cujo nome não termine em `_test`. O `Dockerfile` é multi-stage, exclusivo de produção, com usuário sem root, e tem um alvo `migrate` com a CLI do Prisma. O CI usa pnpm e roda lint, `tsc`, testes e build; na `main`, publica a imagem marcada pelo commit. Segredos ficam só no ambiente do servidor, a aplicação recusa o `JWT_SECRET` de exemplo, e o `.env.example` traz placeholder.
+- **Rule:** Há dois ambientes, desenvolvimento e produção. Em desenvolvimento, a API roda no host, e o Compose sobe só o banco, criando também o banco de teste; a porta é publicada apenas para o desenvolvimento local. `.nvmrc` e `packageManager` fixam as versões. Com `NODE_ENV=test`, a API usa `DATABASE_URL_TEST`, e a limpeza recusa banco cujo nome não termine em `_test`. O `Dockerfile` é multi-stage, exclusivo de produção, com usuário sem root, e tem um alvo `migrate` com a CLI do Prisma. O CI de qualidade usa pnpm e roda lint, `tsc` e testes com PostgreSQL real em cada pull request; o CI de entrega acrescenta o build e, na `main`, publica a imagem marcada pelo commit. Segredos ficam só no ambiente do servidor, a aplicação recusa o `JWT_SECRET` de exemplo, e o `.env.example` traz placeholder.
 
 ### AD-19: Limite de login
 
