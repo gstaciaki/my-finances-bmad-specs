@@ -1,6 +1,6 @@
 # Story 1.2: Proteger e auditar toda escrita no banco
 
-Status: ready-for-dev
+Status: in-progress
 
 Fonte: `_bmad-output/planning-artifacts/epics.md` (Epic 1). Em caso de divergência, vale o `epics.md`.
 
