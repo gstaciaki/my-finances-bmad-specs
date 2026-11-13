@@ -119,7 +119,7 @@ flowchart LR
 
 - **Binds:** all, FR-18
 - **Prevents:** escrita que escapa da auditoria.
-- **Rule:** A extensão lança `ForbiddenOperationError` em `createMany`, `createManyAndReturn`, `updateMany`, `updateManyAndReturn`, `deleteMany`, `$executeRaw`, `$executeRawUnsafe`, escrita aninhada de relação e `$queryRaw` ou `$queryRawUnsafe` que não seja leitura. A checagem de SQL é por palavra-chave: evita erro, não é fronteira de segurança. Escritas usam chave estrangeira escalar, uma linha por vez, inclusive quando afetam várias linhas. Chaves estrangeiras de dados de negócio são `Restrict`: efeitos como "excluir Categoria limpa as Movimentações" são feitos linha a linha no use case. O valor `PrismaClient` só é importado em `src/database/` e em testes, garantido por `no-restricted-imports`; tipos de modelo seguem liberados. Seeds e populates usam o cliente puro e não geram auditoria.
+- **Rule:** A extensão lança `ForbiddenOperationError` em `createMany`, `createManyAndReturn`, `updateMany`, `updateManyAndReturn`, `deleteMany`, `$executeRaw`, `$executeRawUnsafe`, escrita aninhada de relação e `$queryRaw` ou `$queryRawUnsafe` que não seja leitura. A checagem de SQL é por palavra-chave: evita erro, não é fronteira de segurança. Escritas usam chave estrangeira escalar, uma linha por vez, inclusive quando afetam várias linhas. Chaves estrangeiras de dados de negócio são `Restrict`: efeitos como "excluir Categoria limpa as Movimentações" são feitos linha a linha no use case. O valor `PrismaClient` só é importado em `src/database/`, em `test/` e no `jest.setup.ts`, garantido por `@typescript-eslint/no-restricted-imports` com `allowTypeImports`, sobre `@src/generated/prisma/client` e `@prisma/client`; tipos de modelo seguem liberados. Seeds, populates e scripts usam o cliente puro, exportado à parte por `src/database/`, e não geram auditoria.
 
 ### AD-12: Auditoria de escrita
 
@@ -131,7 +131,7 @@ flowchart LR
 
 - **Binds:** auditoria ampliada, NFR-2
 - **Prevents:** senha, token ou dado financeiro em log e perda de requisição por falha do log.
-- **Rule:** Um middleware grava em `RequestLog`, ao terminar cada resposta: método, padrão da rota com segmentos UUID trocados por `:id` (ou `UNMATCHED`), status, duração e autor. Corpo, query string e headers não são gravados, e tokens nunca trafegam no caminho da API. A gravação usa o cliente interno de `src/database/`, fora do Unit of Work, e sua falha nunca altera a resposta.
+- **Rule:** Um middleware grava em `RequestLog`, ao terminar cada resposta: método, padrão da rota, status, duração e autor, vazio se a requisição não foi autenticada. O padrão é `req.baseUrl`, com os valores de `req.params` trocados de volta por `:nome`, mais `req.route.path` (por exemplo `/api/account/:accountId/transaction/:id`), ou `UNMATCHED` quando nenhuma rota casou; o caminho real nunca é gravado, porque o `baseUrl` de routers montados sob parâmetro traz o UUID. Corpo, query string e headers não são gravados, e tokens nunca trafegam no caminho da API. A gravação usa o cliente interno de `src/database/`, fora do Unit of Work, e sua falha nunca altera a resposta.
 
 ### AD-14: Balanço calculado na leitura
 
@@ -155,7 +155,7 @@ flowchart LR
 
 - **Binds:** NFR-4
 - **Prevents:** regra de negócio retornando 500 e formatos de erro diferentes.
-- **Rule:** Toda falha de regra é uma classe em `src/errors/` retornada como `wrong(...)` e mapeada em `getErrorMap`, que ganha 403 e 429. O `catch` de `AbstractUseCase.run` é o único tradutor de erros do Prisma: `P2002` e `P2003` viram 409, `P2025` vira 404, `P2028` e `P2034` viram 503; o restante vira `UnknownError`. O corpo de erro é o atual `{ code, error, slug }`, com `error: { message, errors }` em validação, inclusive no middleware.
+- **Rule:** Toda falha de regra é uma classe em `src/errors/` retornada como `wrong(...)` e mapeada em `getErrorMap`, que ganha 403 e 429. O `catch` de `AbstractUseCase.run` é o único tradutor de erros do Prisma: `P2002` e `P2003` viram 409, `P2025` vira 404, `P2028` e `P2034` viram 503; o restante vira `UnknownError`. Os códigos foram confirmados no Prisma 7.10.1 com `@prisma/adapter-pg`, que traz o erro do driver em `meta.driverAdapterError`. O corpo de erro é o atual `{ code, error, slug }`, com `error: { message, errors }` em validação, inclusive no middleware.
 
 ### AD-18: Ambientes e entrega
 
@@ -222,18 +222,18 @@ flowchart LR
 
 ## Stack
 
-Versões conferidas no registro npm e no `pnpm audit` em 2026-11-08; Prisma, Express, Zod, jsonwebtoken e uuid sobem para versões sem as vulnerabilidades apontadas.
+Versões conferidas no registro npm e no `pnpm audit` em 2026-11-08; Prisma, Express, Zod, jsonwebtoken e uuid sobem para versões sem as vulnerabilidades apontadas. Node, pnpm, TypeScript, Prisma, uuid e Jest foram atualizados em 2026-11-13 para as versões do projeto após a Story 1.1.
 
 | Name | Version |
 | --- | --- |
-| Node.js | 24 |
-| pnpm | 10 |
-| TypeScript | 5.9.3 |
+| Node.js | 26.13 |
+| pnpm | 12.18 |
+| TypeScript | 7.0.2 (o ESLint usa o 6.0.2 por alias) |
 | Express | 5.3.0 |
 | Zod | 4.6.7 |
-| Prisma | 6.19.3 |
+| Prisma | 7.10.1, com `@prisma/adapter-pg` |
 | PostgreSQL | 16 |
-| Jest | 30.2.0 |
+| Jest | 30.5.2, com `@swc/jest` |
 | jsonwebtoken | 9.0.3 |
 | bcryptjs | 3.0.3 |
 | express-rate-limit | 8.7.3 |
@@ -242,7 +242,7 @@ Versões conferidas no registro npm e no `pnpm audit` em 2026-11-08; Prisma, Exp
 | helmet | 8.3.0 |
 | date-fns | 4.4.0 |
 | @date-fns/tz | 1.5.0 |
-| uuid | 11.1.1 |
+| uuid | 14.0.3 |
 | tsc-alias | 1.9.10 |
 | Vue | 3.5.45 |
 | Vite | 8.3.6 |
@@ -315,7 +315,7 @@ src/
 | Provedor de e-mail, SPF e DKIM | Isolados pela porta do AD-15 | Na preparação para produção |
 | Retenção de `RequestLog`, `AuditLog` e `Session` | Volume baixo no início | Antes do uso real ou se as tabelas crescerem |
 | Fila de e-mail com novas tentativas | Evolução de estudo | Quando o envio direto for insuficiente ou por interesse de estudo |
-| Migração de Prisma e TypeScript para novas versões maiores | A extensão foi testada em Prisma 6.19.0 | Depois da v1, repetindo os testes da extensão |
+| Próximas versões maiores de Prisma e TypeScript | A extensão e os códigos de erro foram validados em Prisma 7.10.1 | Antes de atualizar, repetindo os testes da extensão |
 | Provedor e tamanho da VPS, software do proxy e destino do backup | O AD-24 fixa o que afeta o código | Na preparação para produção |
 | Monitoramento e alertas externos | Dois usuários; logs em stdout bastam | Depois do uso real |
 | Documentação da API (issue #19) | Desejável, não bloqueia a v1 | Ao estabilizar as rotas |
