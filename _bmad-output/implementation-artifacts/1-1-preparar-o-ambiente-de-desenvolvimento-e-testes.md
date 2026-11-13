@@ -1,6 +1,6 @@
 # Story 1.1: Preparar o ambiente de desenvolvimento e testes
 
-Status: review
+Status: done
 
 Fonte: `_bmad-output/planning-artifacts/epics.md` (Epic 1). Em caso de divergência, vale o `epics.md`.
 
@@ -88,3 +88,14 @@ Nenhuma. Fechadas depois do último registro:
 - [x] Lint sobre toda a raiz do projeto, com os erros antigos de `test/` corrigidos.
 - [x] Testes passam, no CI e localmente.
 - [x] AD-18 e `epics.md` atualizados com as decisões de escopo.
+
+### Fechamento
+
+- **PR:** `gstaciaki/my-finances-backend#30`, mergeado na `main` em 2026-11-13 (commit `6ee02a5`). O merge foi feito pelo autor com bypass de admin, porque a `main` exige 1 aprovação e o autor não pode aprovar o próprio PR.
+- **Revisão:** feita antes do merge, sem bloqueadores. Os dois pontos de ajuste (o `NODE_TLS_REJECT_UNAUTHORIZED=0` no passo do `prisma generate` e o comentário sobre `PNPM_VERSION` no `Dockerfile`) já não existem na `main`.
+
+### Acompanhar nas próximas histórias
+
+- **Story 1.2 (extensão do Prisma, AR-2):** a tabela de versões e a linha de risco do `ARCHITECTURE-SPINE.md` ainda citam Prisma 6.19 e dizem que a extensão foi testada nessa versão, deixando a migração de versão maior para depois da v1. O projeto está no Prisma 7. Rever antes de implementar a 1.2.
+- **Epic 6 (AR-16):** a imagem de produção ainda leva dependências de desenvolvimento e roda `tsx`; o `JWT_SECRET` de exemplo ainda é aceito (Story 6.3).
+- **Claude Code Review:** o workflow (PR #31) foi desativado temporariamente na `main`. A falha da primeira execução (Claude encerrava em 2 s, sem chamada de modelo) não foi diagnosticada. A action só roda se o workflow do PR for idêntico ao da `main`, então depurar exige mudar a `main` antes.
