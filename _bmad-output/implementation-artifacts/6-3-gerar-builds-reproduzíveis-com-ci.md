@@ -15,13 +15,13 @@ So that eu publique sempre o que foi testado.
 
 - **NFR-6**: Produção: HTTPS, segredos fora do repositório, build e deploy reproduzíveis, 5 tentativas de login por 15 minutos por e-mail, backup diário com restauração testada antes do uso real.
 - **AR-16**: Dockerfile multi-stage de produção com alvo `migrate`; scripts `build` e `start` (AD-18, D-17).
-- **AR-17**: CI com pnpm, lint, `tsc`, testes e build; publicação da imagem na `main` (AD-18, D-19).
+- **AR-17**: CI com pnpm, lint, `tsc` e testes com PostgreSQL real em cada PR (Epic 1, Story 1.1); o mesmo CI ganha o build e a publicação da imagem na `main` (Epic 6, Story 6.3) (AD-18, D-19).
 
 ## Acceptance Criteria
 
-**Given** um push ou PR no backend ou no frontend
-**When** o CI roda com pnpm
-**Then** executa lint, `tsc`, testes e build, com PostgreSQL real nos e2e do backend
+**Given** o CI de qualidade e testes criado na Story 1.1
+**When** o CI roda em um push ou PR no backend ou no frontend
+**Then** além de lint, `tsc` e testes, executa o build, mantendo o PostgreSQL real nos e2e do backend
 
 **Given** um merge na `main`
 **When** o CI termina com sucesso

@@ -70,14 +70,14 @@ Este documento decompõe os requisitos do PRD, do UX e da arquitetura do My Fina
 - AR-9: `EmailSender` com implementação falsa, `APP_BASE_URL` (AD-15).
 - AR-10: `src/util/month.ts` com `@date-fns/tz` e teste contra a expressão SQL (AD-8).
 - AR-11: `app.ts` separado de `server.ts`; e2e com supertest e banco de teste protegido (AD-18, AD-20).
-- AR-12: Atualizar Prisma 6.19.3, Express 5.3.0, Zod 4.6.7, jsonwebtoken 9.0.3 e uuid 11.1.1; adicionar `helmet`, `cookie-parser`, `express-rate-limit`, `date-fns`, `@date-fns/tz`, `tsc-alias`, `supertest`.
+- AR-12: Atualizar as dependências para as versões estáveis mais recentes (na implementação: Prisma 7 com `@prisma/adapter-pg`, Express 5.3, Zod 4.6, jsonwebtoken 9.0, uuid 14 e TypeScript 7); adicionar `helmet`, `cookie-parser`, `express-rate-limit`, `date-fns`, `@date-fns/tz`, `tsc-alias`, `supertest`. Enquanto `ts-jest` e `typescript-eslint` não suportarem o TypeScript 7, o Jest usa `@swc/jest` (sem checagem de tipos, que fica com `tsc`) e o ESLint usa o TypeScript 6 por alias.
 - AR-13: Filtros explícitos no lugar de `autoParseFilters`; header `Location` em 201 (issue #24); `DELETE` responde 204.
 - AR-14: Criação de Conta e vínculo do Dono em uma transação (D-14) e índice `(accountId, occurredAt)` (D-16).
 
 **Infra e operação:**
-- AR-15: Compose só com banco em `127.0.0.1`, script do banco de teste, `.nvmrc`, `packageManager`, `.env.example` com placeholder; aposentar o script `run` (AD-18).
+- AR-15: Compose só com banco, sem restrição de interface por ser apenas o banco de desenvolvimento local, script do banco de teste, `.nvmrc`, `packageManager`, `.env.example` com placeholder; aposentar o script `run` (AD-18).
 - AR-16: Dockerfile multi-stage de produção com alvo `migrate`; scripts `build` e `start` (AD-18, D-17).
-- AR-17: CI com pnpm, lint, `tsc`, testes e build; publicação da imagem na `main` (AD-18, D-19).
+- AR-17: CI com pnpm, lint, `tsc` e testes com PostgreSQL real em cada PR (Epic 1, Story 1.1); o mesmo CI ganha o build e a publicação da imagem na `main` (Epic 6, Story 6.3) (AD-18, D-19).
 - AR-18: Produção em VPS com Compose, proxy HTTPS, `trust proxy`, `helmet`, CORS fechado, `/health` com banco, deploy e rollback por imagem (AD-24).
 - AR-19: Backup diário fora da VPS e restauração testada (AD-24, NFR-6).
 - AR-20: `pnpm admin:create` idempotente; seeds de desenvolvimento sem dependência de `test/` (AD-24).
@@ -149,11 +149,12 @@ Este documento decompõe os requisitos do PRD, do UX e da arquitetura do My Fina
 | NFR-7 | Epic 1 | Web para computador, desde a base do frontend |
 | NFR-8 | Epics 2 a 6 | Cada epic entrega os e2e do seu escopo; o Epic 5 cobre a virada do mês |
 | AR-1, AR-2, AR-4 a AR-9, AR-11 a AR-13 | Epic 1 | AR-13 reaplicado nas listas seguintes |
+| AR-17 | Epic 1 e Epic 6 | CI de qualidade e testes no Epic 1; build e publicação da imagem no Epic 6 |
 | AR-3 | Epic 2 e Epic 4 | Repositório no Epic 2; FK composta no Epic 4 |
 | AR-10 | Epic 5 | `src/util/month.ts` |
 | AR-14 | Epic 2 e Epic 4 | Transação no Epic 2; índice no Epic 4 |
 | AR-15 | Epic 1 | Ambiente de desenvolvimento |
-| AR-16 a AR-21 | Epic 6 | Build, CI, produção, backup e e-mail; AR-20 tem `pnpm admin:create` no Epic 1 |
+| AR-16, AR-18 a AR-21 | Epic 6 | Build, produção, backup e e-mail; AR-20 tem `pnpm admin:create` no Epic 1 |
 | AR-22, AR-23 | Epic 1 | Base do frontend |
 | UX-DR1 a UX-DR4, UX-DR6, UX-DR10 (`AppDialog`), UX-DR11, UX-DR13, UX-DR20 | Epic 1 | Tema, componentes base e cabeçalho |
 | UX-DR10 (`ConfirmDialog`) | Epic 2 | Primeiro uso na exclusão de Conta |
@@ -202,14 +203,14 @@ As a desenvolvedor,
 I want subir o banco e rodar a API e os testes com um comando,
 So that o projeto evolua sobre versões corrigidas e um schema limpo.
 
-**Requisitos:** AR-1, AR-11, AR-12, AR-15, AR-20
+**Requisitos:** AR-1, AR-11, AR-12, AR-15, AR-17, AR-20
 
 **Acceptance Criteria:**
 
 **Given** o repositório recém-clonado
 **When** sigo o README e subo o Compose
-**Then** só o banco sobe, em `127.0.0.1`, com um banco de desenvolvimento e um de teste, e a API roda no host
-**And** as dependências estão nas versões do AR-12, com `.nvmrc`, `packageManager` e `.env.example` só com placeholders
+**Then** só o banco sobe, com um banco de desenvolvimento e um de teste, e a API roda no host
+**And** as dependências estão nas versões mais recentes do AR-12, com `.nvmrc`, `packageManager` e `.env.example` só com placeholders
 **And** o script `run` antigo não existe mais
 
 **Given** o histórico atual de migrations
@@ -224,6 +225,11 @@ So that o projeto evolua sobre versões corrigidas e um schema limpo.
 **Given** `app.ts` separado de `server.ts`
 **When** rodo os e2e
 **Then** o supertest usa `DATABASE_URL_TEST`, e a limpeza recusa banco cujo nome não termine em `_test`
+
+**Given** um pull request para a `main`
+**When** o CI roda com pnpm e o Node do `.nvmrc`
+**Then** executa o lint sem `--fix`, `tsc --noEmit` e os testes, com PostgreSQL real nos e2e
+**And** qualquer passo que falhe reprova o PR
 
 ### Story 1.2: Proteger e auditar toda escrita no banco
 
@@ -1110,9 +1116,9 @@ So that eu publique sempre o que foi testado.
 
 **Acceptance Criteria:**
 
-**Given** um push ou PR no backend ou no frontend
-**When** o CI roda com pnpm
-**Then** executa lint, `tsc`, testes e build, com PostgreSQL real nos e2e do backend
+**Given** o CI de qualidade e testes criado na Story 1.1
+**When** o CI roda em um push ou PR no backend ou no frontend
+**Then** além de lint, `tsc` e testes, executa o build, mantendo o PostgreSQL real nos e2e do backend
 
 **Given** um merge na `main`
 **When** o CI termina com sucesso
