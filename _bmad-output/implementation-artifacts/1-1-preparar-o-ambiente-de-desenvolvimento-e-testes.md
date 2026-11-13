@@ -1,6 +1,6 @@
 # Story 1.1: Preparar o ambiente de desenvolvimento e testes
 
-Status: in-progress
+Status: review
 
 Fonte: `_bmad-output/planning-artifacts/epics.md` (Epic 1). Em caso de divergência, vale o `epics.md`.
 
@@ -56,14 +56,14 @@ Branch `epic-1-story-1/set-dev-and-test-environment`, repositório `my-finances-
 - [x] **AR-11**: `src/app.ts` exporta o Express sem escutar porta, e `server.ts` só inicia. Com `NODE_ENV=test` a API usa `DATABASE_URL_TEST`. `cleanDatabase` recusa banco cujo nome não termine em `_test` (teste em `test/helpers/base-test.spec.ts`). E2E com supertest em `test/e2e/`.
 - [x] **AR-12**: dependências atualizadas e as novas adicionadas, **em versões mais novas que as da story** (ver Desvios). `supertest` ficou em `devDependencies`, com `@types/supertest`.
 - [x] **AR-15**: Compose só com o banco, criando `myfinances` e `myfinances_test` por `docker/init-test-db.sql`; `pnpm test:db:migrate`; `.nvmrc`; `packageManager`; `.env.example` com placeholder; script `run` removido; README reescrito. A restrição a `127.0.0.1` foi retirada do requisito (ver Decisões de escopo).
-- [~] **AR-17 (parte da 1.1)**: `.github/workflows/ci.yml` com `pnpm/setup`, Node pelo `.nvmrc`, `pnpm install --frozen-lockfile`, `prisma generate`, `pnpm test:db:migrate`, `pnpm test` (job `test`, com Postgres 16 como serviço) e `pnpm lint:check` (job `code-quality`). O CI passa. Falta o `tsc --noEmit`.
+- [x] **AR-17 (parte da 1.1)**: `.github/workflows/ci.yml` com `pnpm/setup`, Node pelo `.nvmrc` e `pnpm install --frozen-lockfile`. O job `test` (Postgres 16 como serviço) roda `prisma generate`, `pnpm test:db:migrate`, `pnpm tsc --noEmit` e `pnpm test`. O job `code-quality` roda `pnpm lint:check`. O CI passa.
 - [x] **AR-20 (parte da 1.1)**: seeds e populate de desenvolvimento não dependem de `test/`, e o seed recusa rodar em produção. O `pnpm admin:create` fica para a Story 1.3.
 
 ### Ferramentas e qualidade
 
 - **TypeScript 7:** `tsconfig.json` sem `baseUrl` (removido no TS 7), com `paths` relativos e `types: ["node", "jest"]` declarados.
 - **Jest:** `@swc/jest` no lugar do `ts-jest`. O `moduleNameMapper` é gerado a partir dos `paths` do `tsconfig.json`. `jest.setup.ts` roda como `setupFilesAfterEnv` e desconecta o client do Prisma no `afterAll`, para o Jest encerrar. O `config()` do `dotenv` usa `quiet: true` para não imprimir `injected env` como `console.error` nos testes.
-- **ESLint:** `typescript-eslint` 8.72 recusa TypeScript 7. O pacote `typescript` é um alias para `@typescript/typescript6@6.0.2`, que é o que o `typescript-eslint` enxerga, e o TS 7 fica em `typescript7` (`npm:typescript@^7.0.2`), que fornece o binário `tsc`. A config passou a `eslint.config.mjs`. O script `lint:check` roda `eslint src` sem `--fix` e é o usado no CI.
+- **ESLint:** `typescript-eslint` 8.72 recusa TypeScript 7. O pacote `typescript` é um alias para `@typescript/typescript6@6.0.2`, que é o que o `typescript-eslint` enxerga, e o TS 7 fica em `typescript7` (`npm:typescript@^7.0.2`), que fornece o binário `tsc`. A config passou a `eslint.config.mjs`. O script `lint:check` roda `eslint` sem `--fix` sobre a raiz do projeto (não só `src`) e é o usado no CI; `lint` é a versão com `--fix`. O `jest.config.ts` mantém o `require` do `tsconfig.json` com `eslint-disable-next-line @typescript-eslint/no-require-imports`, porque o Jest o carrega como CommonJS.
 - **Erros de tipo após o upgrade do Express 5:** `req.params.id as string` no controller de user e `Map` tipado em `core/controller.ts`.
 - **Schema:** o `User` tinha perdido a coluna `password` no reset; foi restaurada na migration `init`.
 - **Histórico:** os commits do branch foram reescritos para corrigir o autor (e-mail inválido nos commits antigos e autor `agent` nos do sandbox) e o branch foi publicado novamente no `origin`.
@@ -82,6 +82,9 @@ Branch `epic-1-story-1/set-dev-and-test-environment`, repositório `my-finances-
 
 ### Pendências
 
-- [ ] **`tsc --noEmit` no CI:** o swc não checa tipos, e hoje nenhum job do CI pega erro de tipo. Falta um script `typecheck` no `package.json` e um passo no CI (precisa do `prisma generate` antes, por causa de `src/generated`). Fecha o critério de aceite do CI.
-- [ ] **Lint fora de `src`:** o script `lint:check` só olha `src`. Rodando em `test/` aparecem 2 erros antigos (`no-explicit-any` em `test/helpers/expect-right.ts` e uma linha em branco em `test/prefab/transaction.ts`).
-- [ ] **Testes falhando no ambiente local do autor:** reportados depois do `jest.setup.ts`; o CI passa e no sandbox 13 suítes e 75 testes passam. A investigar.
+Nenhuma. Fechadas depois do último registro:
+
+- [x] `tsc --noEmit` no CI (passo "Check for Type errors", depois do `prisma generate`).
+- [x] Lint sobre toda a raiz do projeto, com os erros antigos de `test/` corrigidos.
+- [x] Testes passam, no CI e localmente.
+- [x] AD-18 e `epics.md` atualizados com as decisões de escopo.
