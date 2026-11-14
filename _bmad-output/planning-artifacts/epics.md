@@ -60,11 +60,11 @@ Este documento decompõe os requisitos do PRD, do UX e da arquitetura do My Fina
 
 **Base do backend (arquitetura):**
 - AR-1: Histórico de migrations zerado; o schema recomeça do zero, sem `cpf`, e cada história adiciona a própria migration (AD-23, AD-25).
-- AR-2: `src/database/`: tipo `DbClient`, extensão Prisma com bloqueio de operações e auditoria, `AsyncLocalStorage`, `uow.run(actor, fn, { lockAccounts })` com rollback em `Wrong`, `FakeUnitOfWork` (AD-10, AD-11, AD-12, AD-22).
+- AR-2: `src/database/`: tipo `DbClient`, cliente puro (só para seeds, populates e scripts), extensão Prisma com bloqueio de operações e auditoria, `AsyncLocalStorage`, `uow.run(actor, fn, { lockAccounts })` com rollback em `Wrong`, `FakeUnitOfWork` (AD-10, AD-11, AD-12, AD-22).
 - AR-3: `AccountScopedRepository`, exceções nomeadas por Usuário e FK composta de Categoria (AD-3).
 - AR-4: Contrato `useCase.run(input, actor)`, políticas em `src/policies/`, `requireAdmin`, entrada de controllers por campos explícitos (AD-2).
 - AR-5: Tradução única de erros Prisma e 403/429 no mapa de erros (AD-17).
-- AR-6: `RequestLog` por middleware, sem corpo, com rota normalizada (AD-13).
+- AR-6: `RequestLog` por middleware, sem corpo, com o padrão da rota (AD-13).
 - AR-7: Sessão em banco, refresh opaco com rotação e janela de 30 s, cookie `httpOnly`, `X-Requested-With` (AD-5, AD-6).
 - AR-8: `zEmail` e `zPassword` únicos, corrigindo o regex de símbolos (AD-23, D-20) e as mensagens com entidade errada (D-21).
 - AR-9: `EmailSender` com implementação falsa, `APP_BASE_URL` (AD-15).
@@ -237,7 +237,7 @@ As a responsável pelo sistema,
 I want que toda escrita seja transacional e registrada,
 So that eu saiba quem alterou o quê e nada seja gravado pela metade.
 
-**Requisitos:** FR-18, NFR-4, AR-2, AR-5, AR-6
+**Requisitos:** FR-18, NFR-4, AR-1, AR-2, AR-5, AR-6
 
 **Acceptance Criteria:**
 
@@ -251,16 +251,28 @@ So that eu saiba quem alterou o quê e nada seja gravado pela metade.
 
 **Given** o cliente da aplicação
 **When** o código usa uma operação proibida do AD-11 ou escreve sem actor
-**Then** recebe `ForbiddenOperationError`, e o valor `PrismaClient` fora de `src/database/` e dos testes falha no lint
+**Then** recebe `ForbiddenOperationError`
+**And** o valor `PrismaClient`, importado de `@src/generated/prisma/client` ou de `@prisma/client`, fora de `src/database/`, de `test/` e do `jest.setup.ts` falha no lint, e os tipos continuam liberados
+**And** seeds, populates e scripts usam o cliente puro, exportado à parte por `src/database/`
 
 **Given** qualquer requisição concluída
 **When** consulto `RequestLog`
-**Then** há método, rota normalizada, status, duração e autor, sem corpo, query string ou headers
+**Then** há método, padrão da rota (por exemplo `/api/account/:accountId/transaction/:id`, ou `UNMATCHED` quando nenhuma rota casou), status, duração e autor, sem corpo, query string ou headers
+**And** o autor é o id do usuário do token, ou vazio se a requisição não foi autenticada
 **And** uma falha ao gravar o log não altera a resposta
 
 **Given** um erro Prisma ou de regra
 **When** a API responde
 **Then** o status segue o AD-17, com corpo `{ code, error, slug }`, e regra violada nunca retorna 500
+**And** os erros novos de 409 e de 503 existem em `src/errors/` e estão no mapa de erros
+
+**Given** o banco com a migration `init`
+**When** aplico a migration desta história
+**Then** `AuditLog` e `RequestLog` existem, sem chave estrangeira em `actorId`, e nenhum dos dois é auditado
+
+**Given** os use cases que hoje escrevem: `create-user`, `update-user`, `delete-user` e `change-user-password`
+**When** executam
+**Then** escrevem só em `uow.run`, com o actor do usuário autenticado, e os testes usam o `FakeUnitOfWork`
 
 ### Story 1.3: Criar o primeiro Admin e fazer login
 
